@@ -9,6 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.acme.quarkussocial.domain.model.Post;
 import org.acme.quarkussocial.domain.model.User;
+import org.acme.quarkussocial.domain.repository.FollowerRepository;
 import org.acme.quarkussocial.domain.repository.PostRepository;
 import org.acme.quarkussocial.domain.repository.UserRepository;
 import org.acme.quarkussocial.rest.dto.CreatePostRequest;
@@ -32,11 +33,16 @@ public class PostsResource {
 
     private final UserRepository userRepository;
     private final PostRepository repository;
+    private final FollowerRepository followerRepository;
 
     @Inject
-    public PostsResource(UserRepository userRepository, PostRepository repository) {
+    public PostsResource(
+            UserRepository userRepository,
+            PostRepository repository,
+            FollowerRepository followerRepository) {
         this.userRepository = userRepository;
         this.repository = repository;
+        this.followerRepository = followerRepository;
     }
 
     @POST
@@ -54,10 +60,26 @@ public class PostsResource {
     }
 
     @GET
-    public Response listPosts(@PathParam("userId") Long userId){
+    public Response listPosts(
+            @PathParam("userId") Long userId,
+            @HeaderParam("followerId") Long followerId){
         User user = userRepository.findById(userId);
         if(user == null){
             return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        if(followerId == null){
+            return Response.status(Response.Status.BAD_REQUEST).entity("You forgot the header").build();
+        }
+
+        User follower = userRepository.findById(followerId);
+
+        if(follower == null ){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Follower not exists").build();
+        }
+
+        boolean follows = followerRepository.follows(follower, user);
+        if(!follows){
+            return Response.status(Response.Status.FORBIDDEN).entity("You can't see these posts").build();
         }
 
         PanacheQuery<Post> query = repository.find("user", Sort.by("dateTime", Sort.Direction.Descending),user);
