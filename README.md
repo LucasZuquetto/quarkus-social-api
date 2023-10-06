@@ -4,6 +4,14 @@ This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
+##Running the application with Docker
+
+```shell script
+./mvnw clean package -DskipTests
+docker build -f src/main/docker/Dockerfile.jvm -t quarkus-social:1.0 .
+docker run -i --rm -p 8080:8080 --name quarkus-social-container quarkus-social:1.0
+```
+
 ## Running the application in dev mode
 
 You can run your application in dev mode that enables live coding using:
