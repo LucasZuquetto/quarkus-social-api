@@ -4,7 +4,7 @@ This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
 If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
 
-##Running the application with Docker
+## Running the application with Docker
 
 ```shell script
 ./mvnw clean package -DskipTests
